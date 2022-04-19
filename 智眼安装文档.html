@@ -1036,9 +1036,7 @@ scl enable devtoolset-9 bash
 yum install -y wget
 
 #创建download文件夹
-mkdir  ~/download
-
-cd  ~/download</code></pre>
+mkdir  ~/download</code></pre>
 </div>
 </div>
 <div class="sect3">
@@ -1294,8 +1292,7 @@ CREATE TABLE public.user_info (
 );
 
 #插入默认帐号信息
-INSERT INTO public.user_info (username,"password") VALUES
-	 ('admin','zhiyan');
+INSERT INTO public.user_info (username,"password") VALUES ('admin','zhiyan');
 
 #创建用户模块信息表
 CREATE TABLE public.user_module_stat_list (
@@ -1407,7 +1404,7 @@ mkdir -p /data/zhiyan/zhiyan-web-server/ /data/zhiyan/zhiyan-server /data/zhiyan
 #创建项目日志文件夹
 mkdir -p /var/log/zhiyan/module /var/log/zhiyan/zhiyan-server /var/log/zhiyan/zhiyan-web-server /var/log/zhiyan/zhiyan-agent
 
-#创建用户：zhiyan
+#创建用户
 useradd --comment ZhiYan --home-dir /var/lib/zhiyan --shell /sbin/nologin zhiyan
 
 #赋权
@@ -1439,29 +1436,34 @@ ln -s /data/zhiyan/zhiyan-web-server/zhiyan-web-server-1.0.0.jar /data/zhiyan/zh
 
 #创建服务文件
 cat &lt;&lt; EOF &gt; /etc/rc.d/init.d/zhiyan-web-server
-#!/bin/bash
+#/bin/bash
 #chkconfig: 2345 90 01
 #description:zhiyan-web-server
 
 CONFIG_FILE=/data/zhiyan/zhiyan-web-server/application.properties
 JAR_FILE=/data/zhiyan/zhiyan-web-server/lastest.jar
+PID=\$(ps -ef | grep "zhiyan-web-server" | grep 'jdk-11' | grep -v grep | awk '{print \$2}')
+ProcNumber=\$(ps -ef |grep -w zhiyan-web-server|grep 'jdk-11'|grep -v grep|wc -l)
 
 start() {
-    echo -n "Starting ZhiYan-Web-Server... "
-    nohup /usr/local/jdk-11/bin/java -Dspring.config.location=$CONFIG_FILE -jar \$JAR_FILE &gt;&gt; /var/log/zhiyan/zhiyan-web-server/nohup.log 2&gt;&amp;1 &amp;
-    echo \$! &gt;/var/run/ZhiYan-Web-Server.pid
+    echo "Starting ZhiYan-Web-Server... "
+    nohup /usr/local/jdk-11/bin/java -Dspring.config.location=\$CONFIG_FILE -jar \$JAR_FILE &gt;&gt; /var/log/zhiyan/zhiyan-web-server/nohup.log 2&gt;&amp;1 &amp;
+    echo \$PID &gt;/var/run/zhiyan-web-server.pid
 }
 
 stop() {
-    echo -n "Shutting down ZhiYan-Web-Server... "
-    PID=\$(cat /var/run/ZhiYan-Web-Server.pid)
-    kill -9 \$PID &amp;&amp;
-        rm -rf /var/run/ZhiYan-Web-Server.pid
-}
+    echo "Shutting down ZhiYan-Web-Server... "
+    kill -9 \$PID
+    rm -rf /var/run/zhiyan-web-server.pid
+    }
 
 status() {
-    PID=\$(cat /var/run/ZhiYan-Web-Server.pid)
-    echo -n "ZhiYan-Web-Server (pid  \$PID) is running..."
+        if [ \$ProcNumber == 0 ];
+        then
+           echo "ZhiYan-Web-Server is Faild"
+        else
+           echo "ZhiYan-Web-Server (pid  \$PID) is running..."
+        fi
 }
 
 case "\$1" in
@@ -1484,7 +1486,6 @@ restart)
     exit 2
     ;;
 esac
-
 EOF
 
 #修改权限
@@ -1602,19 +1603,35 @@ tar zcvf web.tar.gz build/
 </div>
 <div class="listingblock">
 <div class="content">
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#关闭selinux
+
+##（永久关闭）
+sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
+
+##重启
+reboot
+
+##（临时关闭）
+setenforce 0</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#安装nginx
 yum install -y nginx
 
 chkconfig nginx on
 
-nginx
-
 service nginx start
 
-service nginx status
+service nginx status</code></pre>
+</div>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>#修改nginx配置文件,在http{}内增加如下内容
+vi /etc/nginx/nginx.conf
 
-
-#修改nginx配置文件：/etc/nginx/nginx.conf,在http{}内增加如下内容
 server {
   listen 3222;
   # server_name your.domain.com;
@@ -1631,7 +1648,7 @@ server {
   error_page 500 502 503 504 /500.html;
   client_max_body_size 20M;
   keepalive_timeout 10;
-}</code></pre>
+}</pre>
 </div>
 </div>
 </div>
@@ -1659,28 +1676,34 @@ ln -s /data/zhiyan/zhiyan-server/zhiyan-server-1.0.0.jar /data/zhiyan/zhiyan-ser
 
 #创建.service文件
 cat &lt;&lt; EOF &gt; /etc/rc.d/init.d/zhiyan-server
-#!/bin/bash
+#/bin/bash
 #chkconfig: 2345 90 01
 #description:zhiyan-server
 
 CONFIG_FILE=/data/zhiyan/zhiyan-server/application.properties
 JAR_FILE=/data/zhiyan/zhiyan-server/lastest.jar
+PID=\$(ps -ef | grep "zhiyan-server" | grep 'jdk-11' | grep -v grep | awk '{print \$2}')
+ProcNumber=\$(ps -ef |grep -w zhiyan-server|grep 'jdk-11'|grep -v grep|wc -l)
 
 start() {
-    echo -n "Starting ZhiYan-Server... "
+    echo "Starting ZhiYan-Server... "
     nohup /usr/local/jdk-11/bin/java -Dspring.config.location=\$CONFIG_FILE -jar \$JAR_FILE &gt;&gt; /var/log/zhiyan/zhiyan-server/nohup.log 2&gt;&amp;1 &amp;
-    echo \$! &gt;/var/run/ZhiYan-Server.pid
+    echo \$PID &gt;/var/run/zhiyan-server.pid
 }
 
 stop() {
-    echo -n "Shutting down ZhiYan-Server... "
-    PID=\$(cat /var/run/ZhiYan-Server.pid)
+    echo "Shutting down ZhiYan-Server... "
     kill -9 \$PID
+    rm -rf /var/run/zhiyan-server.pid
     }
 
 status() {
-    PID=\$(cat /var/run/ZhiYan-Server.pid)
-    echo -n "ZhiYan-Server (pid  \$PID) is running..."
+        if [ \$ProcNumber == 0 ];
+        then
+           echo "ZhiYan-Server is Faild"
+        else
+           echo "ZhiYan-Server (pid  \$PID) is running..."
+        fi
 }
 
 case "\$1" in
@@ -1811,21 +1834,28 @@ cat &lt;&lt; EOF &gt; /etc/rc.d/init.d/zhiyan-agent
 #chkconfig: 2345 90 01
 #description:zhiyan-agent
 
+PID=\$(ps -ef | grep "zhiyan-agent" | grep "module/bin" | grep -v grep | awk '{print \$2}')
+ProcNumber=\$(ps -ef | grep -w zhiyan-agent |grep "module/bin" | grep -v grep| wc -l)
+
 start() {
-    echo -n "Starting ZhiYan-Agent..."
+    echo "Starting ZhiYan-Agent..."
     nohup /data/zhiyan/module/bin/zhiyan-agent -c /data/zhiyan/module/conf/agent.conf -l /data/zhiyan/module/conf/log.yaml &gt;&gt; /var/log/zhiyan/zhiyan-agent/nohup.log 2&gt;&amp;1 &amp;
-    echo \$! &gt;/var/run/ZhiYan-Agent.pid
+    echo \$PID &gt;/var/run/zhiyan-agent.pid
 }
 
 stop() {
-    echo -n "Shutting down ZhiYan-Agent..."
-    PID=\$(cat /var/run/ZhiYan-Agent.pid)
-    kill -9 \$PID &amp;&amp;
+    echo "Shutting down ZhiYan-Agent..."
+    kill -9 \$PID
+    rm -rf /var/run/zhiyan-agent.pid
 }
 
 status() {
-    PID=\$(cat /var/run/ZhiYan-Agent.pid)
-    echo -n "ZhiYan-Agent (pid  \$PID) is running..."
+        if [ \$ProcNumber == 0 ];
+        then
+           echo "ZhiYan-Agent is Faild"
+        else
+           echo "ZhiYan-Agent (pid  \$PID) is running..."
+        fi
 }
 
 case "\$1" in
@@ -2111,23 +2141,47 @@ cat &lt;&lt; EOF &gt; /etc/rc.d/init.d/zhiyan-mod
 #chkconfig: 2345 90 01
 #description:zhiyan-mod
 
+PID=\$(ps -ef | grep "zhiyan-mod-\$1" | grep "module/bin" | grep -v grep | awk '{print \$2}')
+ProcNumber=\$(ps -ef | grep -w zhiyan-mod-\$1 |grep "module/bin" | grep -v grep| wc -l)
+
+start() {
+    echo "Starting zhiyan-mod-\$1..."
+    nohup /bin/sh /data/zhiyan/module/bin/starter.sh \$1 &gt;&gt;/var/log/zhiyan/module/\$1_nohup.log 2&gt;&amp;1 &amp;
+    echo \$PID &gt;/var/run/zhiyan-mod-\$1.pid
+}
+
+stop() {
+    echo "Shutting down zhiyan-mod-\$1..."
+    kill -9 \$PID
+    rm -rf /var/run/zhiyan-mod-\$1.pid
+}
+
+status() {
+        if [ \$ProcNumber == 0 ];
+        then
+           echo "zhiyan-mod-\$1 is Faild"
+        else
+           echo "zhiyan-mod-\$1 (pid  \$PID) is running..."
+        fi
+}
+
 case "\$2" in
 start)
-    echo -n "Starting ZhiYan-Mod-\$1..."
-    nohup /bin/sh /data/zhiyan/module/bin/starter.sh \$1 &gt;&gt;/var/log/zhiyan/module/\$1.log 2&gt;&amp;1 &amp;
-    echo $! &gt;/var/run/ZhiYan-Mod-\$1.pid
+    start
     ;;
 stop)
-    echo -n "Shutting down ZhiYan-Mod-\$1..."
-    PID=\$(cat /var/run/ZhiYan-Mod-\$1.pid)
-    kill -9 \$PID
+    stop
     ;;
 status)
-    PID=\$(cat /var/run/ZhiYan-Mod-\$1.pid)
-    echo -n "ZhiYan-Mod-\$1 (pid  \$PID) is running..."
+    status
+    ;;
+restart)
+    echo "Restarting zhiyan-mod-\$1 "
+    stop
+    start
     ;;
 *)
-    echo "Usage:service ZhiYan-Mod-\$1{start|stop|status}"
+    echo "Usage:service zhiyan-mod-\$1{start|stop|restart|status}"
     exit 2
     ;;
 esac
@@ -3081,7 +3135,12 @@ sh ~/download/ZhiYan/libzymod-python/build.sh</code></pre>
 <h6 id="_modulepython_2">module(python)</h6>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#python安装脚本
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#python模块安装sdk
+pip3 install -U /root/download/ZhiYan/libzymod-python/dist/zymod-1.7.0-py3-none-any.whl
+
+pip3 install -u /root/download/ZhiYan/libzygrpc/python/dist/zygrpc-0.1.2-py3-none-any.whl
+
+#python安装脚本
 cat &lt;&lt; EOF &gt; ~/download/ZhiYanModule/py_install.sh
 cd zhiyan-mod-\$1 &amp;&amp; sh build.sh &amp;&amp; cd ..
 EOF
@@ -3092,7 +3151,11 @@ sh py_install.sh processes
 
 sh py_install.sh network-address
 
-cp /usr/local/python3/bin/zymod* /data/zhiyan/module/bin/</code></pre>
+cp /usr/local/python3/bin/zymod* /data/zhiyan/module/bin/
+
+将zymod_*改名为zhiyan-mod-*
+
+cp zymod_* zhiyan-mod-*</code></pre>
 </div>
 </div>
 </div>
@@ -3113,65 +3176,84 @@ fi
 EOF
 
 #创建服务文件
-cat &lt;&lt; EOF &gt; /etc/rc.d/init.d/zhiyan-mod
-#!/bin/bash
-#chkconfig: 2345 90 01
-#description:zhiyan-mod
+cat &lt;&lt; EOF &gt; /usr/lib/systemd/system/zhiyan-mod@.service
+[Unit]
+Description=zhiyan-mod-%i
+After=network-online.target remote-fs.target nss-lookup.target
+Wants=network-online.target
 
-case "\$2" in
-start)
-    echo -n "Starting ZhiYan-Mod-\$1..."
-    nohup /bin/sh /data/zhiyan/module/bin/starter.sh \$1 &gt;&gt;/var/log/zhiyan/module/\$1.log 2&gt;&amp;1 &amp;
-    echo $! &gt;/var/run/ZhiYan-Mod-\$1.pid
-    ;;
-stop)
-    echo -n "Shutting down ZhiYan-Mod-\$1..."
-    PID=\$(cat /var/run/ZhiYan-Mod-\$1.pid)
-    kill -9 \$PID
-    ;;
-status)
-    PID=\$(cat /var/run/ZhiYan-Mod-\$1.pid)
-    echo -n "ZhiYan-Mod-\$1 (pid  \$PID) is running..."
-    ;;
-*)
-    echo "Usage:service ZhiYan-Mod-\$1{start|stop|status}"
-    exit 2
-    ;;
-esac
+[Service]
+Type=simple
+User=zhiyan
+Group=zhiyan
+ExecStart=/bin/sh /data/zhiyan/module/bin/starter.sh %i
+StandardOutput=null
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
 EOF
 
-#修改权限
-chmod 755 /etc/rc.d/init.d/zhiyan-mod
 
-service zhiyan-mod bandwidth start
+systemctl  enable zhiyan-mod@bandwidth
+systemctl  start zhiyan-mod@bandwidth
+systemctl  status zhiyan-mod@bandwidth
 
-service zhiyan-mod cpu start
+systemctl  enable zhiyan-mod@cpu
+systemctl  start zhiyan-mod@cpu
+systemctl  status zhiyan-mod@cpu
 
-service zhiyan-mod dns start
+systemctl  enable zhiyan-mod@dns
+systemctl  start zhiyan-mod@dns
+systemctl  status zhiyan-mod@dns
 
-service zhiyan-mod hostname start
+systemctl  enable zhiyan-mod@hostname
+systemctl  start zhiyan-mod@hostname
+systemctl  status zhiyan-mod@hostname
 
-service zhiyan-mod io start
+systemctl  enable zhiyan-mod@io
+systemctl  start zhiyan-mod@io
+systemctl  status zhiyan-mod@io
 
-service zhiyan-mod memory start
+systemctl  enable zhiyan-mod@memory
+systemctl  start zhiyan-mod@memory
+systemctl  status zhiyan-mod@memory
 
-service zhiyan-mod processes start
+systemctl  enable zhiyan-mod@processes
+systemctl  start zhiyan-mod@processes
+systemctl  status zhiyan-mod@processes
 
-service zhiyan-mod swap start
+systemctl  enable zhiyan-mod@swap
+systemctl  start zhiyan-mod@swap
+systemctl  status zhiyan-mod@swap
 
-service zhiyan-mod tasks start
+systemctl  enable zhiyan-mod@tasks
+systemctl  start zhiyan-mod@tasks
+systemctl  status zhiyan-mod@tasks
 
-service zhiyan-mod uptime start
+systemctl  enable zhiyan-mod@uptime
+systemctl  start zhiyan-mod@uptime
+systemctl  status zhiyan-mod@uptime
 
-service zhiyan-mod network-route start
+systemctl  enable zhiyan-mod@network-route
+systemctl  start zhiyan-mod@network-route
+systemctl  status zhiyan-mod@network-route
 
-service zhiyan-mod filesystem start
+systemctl  enable zhiyan-mod@filesystem
+systemctl  start zhiyan-mod@filesystem
+systemctl  status zhiyan-mod@filesystem
 
-service zhiyan-mod network-address start
+systemctl  enable zhiyan-mod@network-address
+systemctl  start zhiyan-mod@network-address
+systemctl  status zhiyan-mod@network-address
 
-service zhiyan-mod load start
+systemctl  enable zhiyan-mod@load
+systemctl  start zhiyan-mod@load
+systemctl  status zhiyan-mod@load
 
-service zhiyan-mod network start</code></pre>
+systemctl  enable zhiyan-mod@network
+systemctl  start zhiyan-mod@network
+systemctl  status zhiyan-mod@network</code></pre>
 </div>
 </div>
 </div>
@@ -3182,7 +3264,7 @@ service zhiyan-mod network start</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-04-14 13:45:31 +0800
+Last updated 2022-04-19 15:46:45 +0800
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
