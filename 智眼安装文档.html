@@ -857,17 +857,19 @@ p { margin-bottom: 1.25rem; }
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd /etc/yum.repos.d/
 
-rm -rf *
-
-vi CentOS-Base.repo</code></pre>
+rm -rf *</code></pre>
 </div>
 </div>
 <div class="paragraph">
-<p>复制并保存以下内容</p>
+<p>生成以下两个repo文件</p>
+</div>
+<div class="paragraph">
+<p>CentOS-Base.repo</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[base]
+<pre>cat &lt;&lt;EOF&gt; /etc/yum.repos.d/CentOS-Base.repo
+[base]
 name=CentOS-$releasever - Base - mirrors.aliyun.com
 failovermethod=priority
 baseurl=http://mirrors.aliyun.com/centos-vault/6.10/os/$basearch/
@@ -926,54 +928,52 @@ baseurl=http://mirrors.aliyun.com/centos-vault/6.10/contrib/$basearch/
 #mirrorlist=http://mirrorlist.centos.org/?release=$releasever&amp;arch=$basearch&amp;repo=contrib
 gpgcheck=1
 enabled=0
-gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-6</pre>
-</div>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">vi epel.repo</code></pre>
+gpgkey=http://mirrors.aliyun.com/centos/RPM-GPG-KEY-CentOS-6
+EOF</pre>
 </div>
 </div>
 <div class="paragraph">
-<p>复制并保存以下内容</p>
+<p>epel.repo</p>
 </div>
 <div class="listingblock">
 <div class="content">
-<pre>[epel]
-name=Extra Packages for Enterprise Linux 6 - $basearch
-baseurl=http://mirrors.aliyun.com/epel-archive/6/$basearch
-        http://mirrors.aliyuncs.com/epel-archive/6/$basearch
-        http://mirrors.cloud.tencent.com/epel/6/$basearch
-        http://mirrors.tencentyun.com/epel/6/$basearch
-#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&amp;arch=$basearch
+<pre>cat &lt;&lt;EOF&gt; /etc/yum.repos.d/epel.repo
+[epel]
+name=Extra Packages for Enterprise Linux 6 - \$basearch
+baseurl=http://mirrors.aliyun.com/epel-archive/6/\$basearch
+        http://mirrors.aliyuncs.com/epel-archive/6/\$basearch
+        http://mirrors.cloud.tencent.com/epel/6/\$basearch
+        http://mirrors.tencentyun.com/epel/6/\$basearch
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-6&amp;arch=\$basearch
 failovermethod=priority
 enabled=1
 gpgcheck=0
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 
 [epel-debuginfo]
-name=Extra Packages for Enterprise Linux 6 - $basearch - Debug
-baseurl=http://mirrors.aliyun.com/epel-archive/6/$basearch/debug
-        http://mirrors.aliyuncs.com/epel-archive/6/$basearch/debug
-        http://mirrors.cloud.tencent.com/epel/6/$basearch/debug
-        http://mirrors.tencentyun.com/epel/6/$basearch/debug
-#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-debug-6&amp;arch=$basearch
+name=Extra Packages for Enterprise Linux 6 - \$basearch - Debug
+baseurl=http://mirrors.aliyun.com/epel-archive/6/\$basearch/debug
+        http://mirrors.aliyuncs.com/epel-archive/6/\$basearch/debug
+        http://mirrors.cloud.tencent.com/epel/6/\$basearch/debug
+        http://mirrors.tencentyun.com/epel/6/\$basearch/debug
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-debug-6&amp;arch=\$basearch
 failovermethod=priority
 enabled=0
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 gpgcheck=0
 
 [epel-source]
-name=Extra Packages for Enterprise Linux 6 - $basearch - Source
+name=Extra Packages for Enterprise Linux 6 - \$basearch - Source
 baseurl=http://mirrors.aliyun.com/epel-archive/6/SRPMS
         http://mirrors.aliyuncs.com/epel-archive/6/SRPMS
         http://mirrors.cloud.tencent.com/epel/6/SRPMS
         http://mirrors.tencentyun.com/epel/6/SRPMS
-#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-source-6&amp;arch=$basearch
+#mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-source-6&amp;arch=\$basearch
 failovermethod=priority
 enabled=0
 gpgkey=file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
-gpgcheck=0</pre>
+gpgcheck=0
+EOF</pre>
 </div>
 </div>
 <div class="listingblock">
@@ -2141,44 +2141,33 @@ cat &lt;&lt; EOF &gt; /etc/rc.d/init.d/zhiyan-mod
 #chkconfig: 2345 90 01
 #description:zhiyan-mod
 
-PID=\$(ps -ef | grep "zhiyan-mod-\$1" | grep "module/bin" | grep -v grep | awk '{print \$2}')
-ProcNumber=\$(ps -ef | grep -w zhiyan-mod-\$1 |grep "module/bin" | grep -v grep| wc -l)
-
-start() {
-    echo "Starting zhiyan-mod-\$1..."
-    nohup /bin/sh /data/zhiyan/module/bin/starter.sh \$1 &gt;&gt;/var/log/zhiyan/module/\$1_nohup.log 2&gt;&amp;1 &amp;
-    echo \$PID &gt;/var/run/zhiyan-mod-\$1.pid
-}
-
-stop() {
-    echo "Shutting down zhiyan-mod-\$1..."
-    kill -9 \$PID
-    rm -rf /var/run/zhiyan-mod-\$1.pid
-}
-
-status() {
-        if [ \$ProcNumber == 0 ];
-        then
-           echo "zhiyan-mod-\$1 is Faild"
-        else
-           echo "zhiyan-mod-\$1 (pid  \$PID) is running..."
-        fi
-}
+PID=\$(ps -ef | grep zhiyan-mod-\$1 | grep "module/bin" | grep -v grep | awk '{print \$2}')
+ProcNumber=\$(ps -ef | grep -w zhiyan-mod-\$1 | grep "module/bin" | grep -v grep | wc -l)
 
 case "\$2" in
 start)
-    start
+    echo "Starting zhiyan-mod-\$1..."
+    nohup /bin/sh /data/zhiyan/module/bin/starter.sh \$1 &gt;&gt;/var/log/zhiyan/module/\$1_nohup.log 2&gt;&amp;1 &amp;
+    echo \$PID &gt;/var/run/zhiyan-mod-\$1.pid
     ;;
 stop)
-    stop
+    echo "Shutting down zhiyan-mod-\$1..."
+    kill -9 \$PID
+    rm -rf /var/run/zhiyan-mod-\$1.pid
     ;;
 status)
-    status
+    if [ \$ProcNumber == 0 ]; then
+        echo "zhiyan-mod-\$1 is Faild"
+    else
+        echo "zhiyan-mod-\$1 (pid  \$PID) is running..."
+    fi
     ;;
 restart)
     echo "Restarting zhiyan-mod-\$1 "
-    stop
-    start
+    kill -9 \$PID
+    rm -rf /var/run/zhiyan-mod-\$1.pid
+    nohup /bin/sh /data/zhiyan/module/bin/starter.sh \$1 &gt;&gt;/var/log/zhiyan/module/\$1_nohup.log 2&gt;&amp;1 &amp;
+    echo \$PID &gt;/var/run/zhiyan-mod-\$1.pid
     ;;
 *)
     echo "Usage:service zhiyan-mod-\$1{start|stop|restart|status}"
