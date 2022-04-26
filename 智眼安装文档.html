@@ -811,7 +811,7 @@ p { margin-bottom: 1.25rem; }
 <li><a href="#_安装rust_2">2.1.5. 安装rust</a></li>
 <li><a href="#_安装postgresql">2.1.6. 安装PostgreSQL</a>
 <ul class="sectlevel4">
-<li><a href="#_zhiyan数据库设置">zhiyan数据库设置</a></li>
+<li><a href="#_智眼数据库_2">智眼数据库</a></li>
 </ul>
 </li>
 <li><a href="#_redis_2">2.1.7. redis</a></li>
@@ -2235,16 +2235,16 @@ scl enable devtoolset-9 bash
 yum install -y wget
 
 #创建download文件夹
-mkdir  ~/download
-
-cd  ~/download</code></pre>
+mkdir  ~/download</code></pre>
 </div>
 </div>
 <div class="sect3">
 <h4 id="_安装openssl_2">2.1.1. 安装OpenSSL</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">wget --no-check-certificate https://www.openssl.org/source/old/1.1.1/openssl-1.1.1m.tar.gz -O openssl-1.1.1m.tar.gz
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd  ~/download
+
+wget --no-check-certificate https://www.openssl.org/source/old/1.1.1/openssl-1.1.1m.tar.gz -O openssl-1.1.1m.tar.gz
 
 tar xf openssl-1.1.1m.tar.gz
 
@@ -2306,7 +2306,9 @@ ldconfig -p|grep libsqlite3.so</code></pre>
 <h4 id="_安装python_2">2.1.3. 安装Python</h4>
 <div class="listingblock">
 <div class="content">
-<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#安装python
+<pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd  ~/download
+
+#安装python
 wget https://www.python.org/ftp/python/3.10.4/Python-3.10.4.tgz -O Python-3.10.4.tgz
 
 tar xf Python-3.10.4.tgz
@@ -2436,6 +2438,7 @@ postgresql-setup initdb
 #查看是否生成数据库配置文件
 ll /var/lib/pgsql/data
 
+#修改/var/lib/pgsql/10/data/pg_hba.conf文件中的内容
 # grep -v '^#' /var/lib/pgsql/data/pg_hba.conf |sort -u
 host    all             all             0.0.0.0/0               password
 local   all             all                                     peer
@@ -2452,7 +2455,7 @@ systemctl status postgresql</code></pre>
 </div>
 </div>
 <div class="sect4">
-<h5 id="_zhiyan数据库设置">zhiyan数据库设置</h5>
+<h5 id="_智眼数据库_2">智眼数据库</h5>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#切换用户
@@ -2467,7 +2470,6 @@ create user zhiyan with password 'aeJeifasho1aiphainga';
 #创建zhiyan数据库
 create database zhiyan owner zhiyan;
 
-
 #选择zhiyan数据库
 \c zhiyan
 
@@ -2480,8 +2482,7 @@ CREATE TABLE public.user_info (
 );
 
 #插入默认帐号信息
-INSERT INTO public.user_info (username,"password") VALUES
-	 ('admin','zhiyan');
+INSERT INTO public.user_info (username,"password") VALUES ('admin','zhiyan');
 
 #创建用户模块信息表
 CREATE TABLE public.user_module_stat_list (
@@ -2570,7 +2571,7 @@ mkdir -p /data/zhiyan/zhiyan-web-server/ /data/zhiyan/zhiyan-server /data/zhiyan
 #创建项目日志文件夹
 mkdir -p /var/log/zhiyan/module /var/log/zhiyan/zhiyan-server /var/log/zhiyan/zhiyan-web-server /var/log/zhiyan/zhiyan-agent
 
-#创建用户：zhiyan
+#创建用户
 useradd --comment ZhiYan --home-dir /var/lib/zhiyan --shell /sbin/nologin zhiyan
 
 #赋权
@@ -2745,6 +2746,8 @@ systemctl  status nginx
 
 
 #修改nginx配置文件：/etc/nginx/nginx.conf,在http{}内增加如下内容
+vi /etc/nginx/nginx.conf
+
 server {
   listen 8080;
   # server_name your.domain.com;
@@ -3098,10 +3101,10 @@ headers={"buff_cache":"内核缓冲/缓存","free":"未分配","used":"已分配
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">cd ~/download/ZhiYan/libzygrpc/python
 
 #安装依赖
-pip3 install -U grpcio protobuf grpcio-tools
+pip310 install -U grpcio protobuf grpcio-tools
 
 #在libzygrpc目录下运行
-python3 -m grpc_tools.protoc -I . --python_out=python/ --grpc_python_out=python/ proto/zhiyan_rpc.proto
+python310 -m grpc_tools.protoc -I . --python_out=python/ --grpc_python_out=python/ proto/zhiyan_rpc.proto
 #gRPC工具会生成两个Python文件：proto/zhiyan_rpc_pb2.py,proto/zhiyan_rpc_pb2_grpc.py
 
 #安装
@@ -3125,9 +3128,9 @@ sh ~/download/ZhiYan/libzymod-python/build.sh</code></pre>
 <div class="listingblock">
 <div class="content">
 <pre class="highlightjs highlight"><code class="language-bash hljs" data-lang="bash">#python模块安装sdk
-pip3 install -U /root/download/ZhiYan/libzymod-python/dist/zymod-1.7.0-py3-none-any.whl
+pip310 install -U /root/download/ZhiYan/libzymod-python/dist/zymod-1.7.0-py3-none-any.whl
 
-pip3 install -u /root/download/ZhiYan/libzygrpc/python/dist/zygrpc-0.1.2-py3-none-any.whl
+pip310 install -u /root/download/ZhiYan/libzygrpc/python/dist/zygrpc-0.1.2-py3-none-any.whl
 
 #python安装脚本
 cat &lt;&lt; EOF &gt; ~/download/ZhiYanModule/py_install.sh
@@ -3140,9 +3143,9 @@ sh py_install.sh processes
 
 sh py_install.sh network-address
 
-cp /usr/local/python3/bin/zymod* /data/zhiyan/module/bin/
+cp /usr/local/python310/bin/zymod* /data/zhiyan/module/bin/
 
-将zymod_*改名为zhiyan-mod-*
+#将zymod_*改名为zhiyan-mod-*
 
 cp zymod_* zhiyan-mod-*</code></pre>
 </div>
@@ -3245,6 +3248,28 @@ systemctl  start zhiyan-mod@network
 systemctl  status zhiyan-mod@network</code></pre>
 </div>
 </div>
+<div class="listingblock">
+<div class="content">
+<pre>重启：
+
+systemctl  restart zhiyan-mod@bandwidth
+systemctl  restart zhiyan-mod@cpu
+systemctl  restart zhiyan-mod@dns
+systemctl  restart zhiyan-mod@hostname
+systemctl  restart zhiyan-mod@io
+systemctl  restart zhiyan-mod@memory
+systemctl  restart zhiyan-mod@processes
+systemctl  restart zhiyan-mod@swap
+systemctl  restart zhiyan-mod@tasks
+systemctl  restart zhiyan-mod@uptime
+systemctl  restart zhiyan-mod@network-route
+systemctl  restart zhiyan-mod@filesystem
+systemctl  restart zhiyan-mod@network-address
+systemctl  restart zhiyan-mod@load
+systemctl  restart zhiyan-mod@network
+systemctl  restart zhiyan-agent</pre>
+</div>
+</div>
 </div>
 </div>
 </div>
@@ -3253,7 +3278,7 @@ systemctl  status zhiyan-mod@network</code></pre>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-04-19 15:46:45 +0800
+Last updated 2022-04-14 13:45:31 +0800
 </div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
