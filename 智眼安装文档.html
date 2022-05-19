@@ -844,6 +844,38 @@ p { margin-bottom: 1.25rem; }
 </li>
 </ul>
 </li>
+<li><a href="#_从源安装自托管_timescaledb">3. 从源安装自托管 TimescaleDB</a>
+<ul class="sectlevel2">
+<li><a href="#_安装timescaledb">3.1. 安装TimescaleDB</a>
+<ul class="sectlevel3">
+<li><a href="#_在命令提示符下克隆_timescale_github_存储库">3.1.1. 在命令提示符下，克隆 Timescale GitHub 存储库：</a></li>
+<li><a href="#_切换到克隆目录">3.1.2. 切换到克隆目录：</a></li>
+<li><a href="#_查看最新版本您可以在官网的发布页面上找到最新的发布标签_httpsgithub_comtimescaletimescaledbreleases">3.1.3. 查看最新版本，您可以在官网的发布页面上找到最新的发布标签：（ <code>https://github.com/timescale/timescaledb/releases</code> ）</a></li>
+<li><a href="#_引导构建系统">3.1.4. 引导构建系统：</a></li>
+<li><a href="#_创建扩展">3.1.5. 创建扩展：</a></li>
+<li><a href="#_安装_timescaledb">3.1.6. 安装 TimescaleDB：</a></li>
+</ul>
+</li>
+<li><a href="#_从源安装后配置_postgresql">3.2. 从源安装后配置 PostgreSQL</a>
+<ul class="sectlevel3">
+<li><a href="#_找到_postgresql_conf_配置文件">3.2.1. 找到 <code>postgresql.conf</code> 配置文件：</a></li>
+<li><a href="#_在配置文件里面找到_shared_preload_libraries_参数取消注释并修改">3.2.2. 在配置文件里面找到 <code>shared_preload_libraries</code> 参数，取消注释并修改</a></li>
+<li><a href="#_重启_postgresql_实例">3.2.3. 重启 PostgreSQL 实例：</a></li>
+<li><a href="#_查看_postgresql_实例状态">3.2.4. 查看 PostgreSQL 实例状态：</a></li>
+</ul>
+</li>
+<li><a href="#_设置_timescaledb_扩展">3.3. 设置 TimescaleDB 扩展</a>
+<ul class="sectlevel3">
+<li><a href="#_连接postgresql_实例">3.3.1. 连接PostgreSQL 实例：</a></li>
+<li><a href="#_在_psql_提示符下创建一个空数据库我们的数据库称为example如果有数据库请跳过">3.3.2. 在 <code>psql</code> 提示符下，创建一个空数据库。我们的数据库称为example（如果有数据库请跳过）：</a></li>
+<li><a href="#_连接到您创建的数据库">3.3.3. 连接到您创建的数据库：</a></li>
+<li><a href="#_添加_timescaledb_扩展">3.3.4. 添加 TimescaleDB 扩展：</a></li>
+<li><a href="#_您现在可以使用以下命令连接到您的数据库">3.3.5. 您现在可以使用以下命令连接到您的数据库：</a></li>
+<li><a href="#_dx_您可以在提示符处使用命令检查是否安装了_timescaledb_扩展psql它看起来像这样">3.3.6. <code>\dx</code> 您可以在提示符处使用命令检查是否安装了 TimescaleDB 扩展psql。它看起来像这样：</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
@@ -2438,7 +2470,7 @@ postgresql-setup initdb
 #查看是否生成数据库配置文件
 ll /var/lib/pgsql/data
 
-#修改/var/lib/pgsql/10/data/pg_hba.conf文件中的内容
+#修改/var/lib/pgsql/data/pg_hba.conf文件中的内容
 # grep -v '^#' /var/lib/pgsql/data/pg_hba.conf |sort -u
 host    all             all             0.0.0.0/0               password
 local   all             all                                     peer
@@ -3269,6 +3301,198 @@ systemctl  restart zhiyan-mod@load
 systemctl  restart zhiyan-mod@network
 systemctl  restart zhiyan-agent</pre>
 </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_从源安装自托管_timescaledb">3. 从源安装自托管 TimescaleDB</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_安装timescaledb">3.1. 安装TimescaleDB</h3>
+<div class="sect3">
+<h4 id="_在命令提示符下克隆_timescale_github_存储库">3.1.1. 在命令提示符下，克隆 Timescale GitHub 存储库：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>git clone https://github.com/timescale/timescaledb.git</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_切换到克隆目录">3.1.2. 切换到克隆目录：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>cd timescaledb</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_查看最新版本您可以在官网的发布页面上找到最新的发布标签_httpsgithub_comtimescaletimescaledbreleases">3.1.3. 查看最新版本，您可以在官网的发布页面上找到最新的发布标签：（ <code><a href="https://github.com/timescale/timescaledb/releases" class="bare">https://github.com/timescale/timescaledb/releases</a></code> ）</h4>
+<div class="listingblock">
+<div class="content">
+<pre>git checkout 2.5.1</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_引导构建系统">3.1.4. 引导构建系统：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>./bootstrap</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_创建扩展">3.1.5. 创建扩展：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>cd build &amp;&amp; make</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_安装_timescaledb">3.1.6. 安装 TimescaleDB：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>make install</pre>
+</div>
+</div>
+<div class="admonitionblock tip">
+<table>
+<tr>
+<td class="icon">
+<i class="fa icon-tip" title="Tip"></i>
+</td>
+<td class="content">
+如果遇到&#8217;CMake Error at cmake_install.cmake:54 (file):
+  file INSTALL cannot copy file
+  "../../../timescaledb/build/timescaledb.control" to
+  "/usr/share/postgresql/extension/timescaledb.control": Permission denied.'
+make: <strong>*</strong> [Makefile:100：install] 错误 1
+</td>
+</tr>
+</table>
+</div>
+<div class="paragraph">
+<p>解决方法：请在 <code>make insatll</code> 前面加上 <code>sudo</code></p>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_从源安装后配置_postgresql">3.2. 从源安装后配置 PostgreSQL</h3>
+<div class="sect3">
+<h4 id="_找到_postgresql_conf_配置文件">3.2.1. 找到 <code>postgresql.conf</code> 配置文件：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>psql -d postgres -c "SHOW config_file;"</pre>
+</div>
+</div>
+<div class="paragraph">
+<p>或者</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre>sudo vim /var/lib/postgres/data/postgresql.conf</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_在配置文件里面找到_shared_preload_libraries_参数取消注释并修改">3.2.2. 在配置文件里面找到 <code>shared_preload_libraries</code> 参数，取消注释并修改</h4>
+<div class="listingblock">
+<div class="content">
+<pre>shared_preload_libraries = '' ——&gt; shared_preload_libraries = 'timescaledb'</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_重启_postgresql_实例">3.2.3. 重启 PostgreSQL 实例：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>service postgresql restart</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_查看_postgresql_实例状态">3.2.4. 查看 PostgreSQL 实例状态：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>service postgresql status</pre>
+</div>
+</div>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_设置_timescaledb_扩展">3.3. 设置 TimescaleDB 扩展</h3>
+<div class="sect3">
+<h4 id="_连接postgresql_实例">3.3.1. 连接PostgreSQL 实例：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>psql -U postgres -h localhost</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_在_psql_提示符下创建一个空数据库我们的数据库称为example如果有数据库请跳过">3.3.2. 在 <code>psql</code> 提示符下，创建一个空数据库。我们的数据库称为example（如果有数据库请跳过）：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>CREATE database example;</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_连接到您创建的数据库">3.3.3. 连接到您创建的数据库：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>\c example</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_添加_timescaledb_扩展">3.3.4. 添加 TimescaleDB 扩展：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>CREATE EXTENSION IF NOT EXISTS timescaledb;</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_您现在可以使用以下命令连接到您的数据库">3.3.5. 您现在可以使用以下命令连接到您的数据库：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>psql -U postgres -h localhost -d example</pre>
+</div>
+</div>
+</div>
+<div class="sect3">
+<h4 id="_dx_您可以在提示符处使用命令检查是否安装了_timescaledb_扩展psql它看起来像这样">3.3.6. <code>\dx</code> 您可以在提示符处使用命令检查是否安装了 TimescaleDB 扩展psql。它看起来像这样：</h4>
+<div class="listingblock">
+<div class="content">
+<pre>tsdb=&gt; \dx
+List of installed extensions
+-[ RECORD 1 ]------------------------------------------------------------------
+Name        | pg_stat_statements
+Version     | 1.7
+Schema      | public
+Description | track execution statistics of all SQL statements executed
+-[ RECORD 2 ]------------------------------------------------------------------
+Name        | plpgsql
+Version     | 1.0
+Schema      | pg_catalog
+Description | PL/pgSQL procedural language
+-[ RECORD 3 ]------------------------------------------------------------------
+Name        | timescaledb
+Version     | 2.5.1
+Schema      | public
+Description | Enables scalable inserts and complex queries for time-series data
+-[ RECORD 4 ]------------------------------------------------------------------
+Name        | timescaledb_toolkit
+Version     | 1.3.1
+Schema      | public
+Description | timescaledb_toolkit
+
+tsdb=&gt;</pre>
 </div>
 </div>
 </div>
