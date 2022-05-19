@@ -3310,6 +3310,25 @@ systemctl  restart zhiyan-agent</pre>
 <div class="sect1">
 <h2 id="_从源安装自托管_timescaledb">3. 从源安装自托管 TimescaleDB</h2>
 <div class="sectionbody">
+<div class="paragraph">
+<p>您可以通过下载源代码并编译它自己在任何系统上托管 TimescaleDB。这些说明不需要使用包管理器或安装工具。</p>
+</div>
+<div class="paragraph">
+<p>在开始之前，请确保您已安装：</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>PostgreSQL 12 或更高版本，带有开发环境。有关 PostgreSQL 安装的更多信息，包括下载和说明，请参阅 PostgreSQL 文档（ <code><a href="https://www.postgresql.org/download/" class="bare">https://www.postgresql.org/download/</a></code> ）。</p>
+</li>
+<li>
+<p>CMake 版本 3.11 或更高版本。有关 CMake 安装的更多信息，包括下载和说明，请参阅 CMake 文档（ <code><a href="https://cmake.org/download/" class="bare">https://cmake.org/download/</a></code> ）。</p>
+</li>
+<li>
+<p>适用于您的操作系统的 C 语言编译器，例如 <code>gcc</code> 或 <code>clang</code> .</p>
+</li>
+</ul>
+</div>
 <div class="sect2">
 <h3 id="_安装timescaledb">3.1. 安装TimescaleDB</h3>
 <div class="sect3">
