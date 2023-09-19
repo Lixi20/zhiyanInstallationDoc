@@ -1,0 +1,8 @@
+# build artifacts
+vendor/
+.bundle/
+Gemfile.lock
+智眼安装文档.html
+智眼安装文档.pdf
+*_build.sh
+release_github_io.sh
